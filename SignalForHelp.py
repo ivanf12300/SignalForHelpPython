@@ -22,8 +22,10 @@ framesEsperando = 100
 totalDeFrames = 0
 
 while True:
+    print(totalDeFrames)
     success, frame = camara.read()
     if not success:
+        totalDeFrames += 1
         break
 
     frame = cv2.flip(frame, 1)
@@ -51,16 +53,12 @@ while True:
                 if puntos[tips[0]].x > puntos[tips[0] - 1].x:
                     dedos_levantados += 1
             
-            # Pulgar
-            #if puntos[tips[0]].x < puntos[tips[0] - 1].x:
-            #    dedos_levantados += 1
-
             # Otros dedos
             for tip in tips[1:]:
                 if puntos[tip].y < puntos[tip - 2].y:
                     dedos_levantados += 1
 
-            if totalDeFrames == framesEsperando and ciclos >= 1:
+            if totalDeFrames == framesEsperando and ciclos >= 0:
                 totalDeFrames = 0 
                 ciclos = 0
 
@@ -85,7 +83,8 @@ while True:
             if reproducir == True:
                 playsound3.playsound("Detector de signal for help/alarm1.mp3")
             else:
-                continue
+                continue   
+
     if alerta_activa:
         totalDeFrames = 0
         cv2.rectangle(frame, (0, 0), (frame.shape[1], frame.shape[0]), (0, 0, 255), cv2.FILLED)
