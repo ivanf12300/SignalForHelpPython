@@ -5,6 +5,7 @@ import mediapipe.python.solutions.drawing_utils as mp_draw
 import playsound3
 
 reproducir = False
+firstFrame = True
 
 hands = mp_hands.Hands(
     max_num_hands=1,
@@ -30,7 +31,7 @@ while True:
     dedos_levantados = 0
 
     if results.multi_hand_landmarks: # type: ignore
-        for hand_landmarks in results.multi_hand_landmarks: # type: ignore
+        for index, hand_landmarks in enumerate(results.multi_hand_landmarks): # type: ignore
             # Dibujar lineas de la mano
             mp_draw.draw_landmarks(
                 frame,
@@ -41,9 +42,18 @@ while True:
             puntos = hand_landmarks.landmark
             tips = [4, 8, 12, 16, 20]
 
+            hand_label = results.multi_handedness[index].classification[0].label #type: ignore
+
+            if hand_label == "Right":
+                if puntos[tips[0]].x < puntos[tips[0] - 1].x:
+                    dedos_levantados += 1
+            else: 
+                if puntos[tips[0]].x > puntos[tips[0] - 1].x:
+                    dedos_levantados += 1
+            
             # Pulgar
-            if puntos[tips[0]].x < puntos[tips[0] - 1].x:
-                dedos_levantados += 1
+            #if puntos[tips[0]].x < puntos[tips[0] - 1].x:
+            #    dedos_levantados += 1
 
             # Otros dedos
             for tip in tips[1:]:
@@ -73,7 +83,7 @@ while True:
             totalDeFrames += 1
 
             if reproducir == True:
-                playsound3.playsound("alarm1.mp3")
+                playsound3.playsound("Detector de signal for help/alarm1.mp3")
             else:
                 continue
 
