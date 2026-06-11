@@ -37,7 +37,7 @@ while True:
     dedos_levantados = 0
 
     if results.multi_hand_landmarks: # type: ignore
-        for hand_landmarks in results.multi_hand_landmarks: # type: ignore
+        for index, hand_landmarks in enumerate(results.multi_hand_landmarks): # type: ignore
             # Dibujar lineas de la mano
             mp_draw.draw_landmarks(
                 frame,
@@ -48,9 +48,14 @@ while True:
             puntos = hand_landmarks.landmark
             tips = [4, 8, 12, 16, 20]
 
-            # Pulgar
-            if puntos[tips[0]].x < puntos[tips[0] - 1].x:
-                dedos_levantados += 1
+            hand_label = results.multi_handedness[index].classification[0].label #type: ignore
+
+            if hand_label == "Right":
+                if puntos[tips[0]].x < puntos[tips[0] - 1].x:
+                    dedos_levantados += 1
+            else: 
+                if puntos[tips[0]].x > puntos[tips[0] - 1].x:
+                    dedos_levantados += 1
 
             # Otros dedos
             for tip in tips[1:]:
