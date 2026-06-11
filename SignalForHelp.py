@@ -86,15 +86,14 @@ while True:
                 playsound3.playsound("Detector de signal for help/alarm1.mp3")
             else:
                 continue
-
     if alerta_activa:
         totalDeFrames = 0
-        cv2.rectangle(frame,(0,0),(1000,1000),(0,0,255),cv2.FILLED)
+        cv2.rectangle(frame, (0, 0), (frame.shape[1], frame.shape[0]), (0, 0, 255), cv2.FILLED)
         cv2.putText(
             frame,
             "alguien necesita ayuda",
-            (50, 220),
-            cv2.FONT_ITALIC,
+            (40,240),
+            cv2.FONT_HERSHEY_DUPLEX,
             1.5,
             (0, 0, 0),
             4
