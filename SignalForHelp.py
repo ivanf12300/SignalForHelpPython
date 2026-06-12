@@ -3,9 +3,18 @@ import mediapipe as mp
 import mediapipe.python.solutions.hands as mp_hands
 import mediapipe.python.solutions.drawing_utils as mp_draw
 import playsound3
+import threading 
 
 reproducir = False
 firstFrame = True
+AlreadyReproduced = False 
+
+audio_en_reproduccion = False 
+
+def reproducirAudio(sound):
+    global audio_en_reproduccion
+    playsound3.playsound(sound)
+    audio_en_reproduccion = False
 
 hands = mp_hands.Hands(
     max_num_hands=1,
@@ -22,7 +31,6 @@ framesEsperando = 100
 totalDeFrames = 0
 
 while True:
-    print(totalDeFrames)
     success, frame = camara.read()
     if not success:
         totalDeFrames += 1
@@ -73,21 +81,29 @@ while True:
             if ciclos >= 5:
                 alerta_activa = True
                 ciclos = 0  
-                frames_alerta = 90   
+                frames_alerta = 490
 
             # Mostrar información en pantalla
-            cv2.putText(frame, f"Dedos: {dedos_levantados}", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            cv2.putText(frame, f"Ciclos: {ciclos}/5", (50, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-            totalDeFrames += 1
 
-            if reproducir == True:
-                playsound3.playsound("Detector de signal for help/alarm1.mp3")
+            if not alerta_activa:
+                cv2.putText(frame, f"Dedos: {dedos_levantados}", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                cv2.putText(frame, f"Ciclos: {ciclos}/5", (50, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+                totalDeFrames += 1
             else:
-                continue   
+                continue
+
+    if reproducir and not audio_en_reproduccion:
+        audio_en_reproduccion = True
+        reproducir = False
+        t = threading.Thread(
+        target=reproducirAudio,
+        args=("Detector de signal for help/alarm1.mp3",),
+        daemon=True)
+        t.start()
 
     if alerta_activa:
         totalDeFrames = 0
-        cv2.rectangle(frame, (0, 0), (frame.shape[1], frame.shape[0]), (0, 0, 255), cv2.FILLED)
+        cv2.rectangle(frame, (0, 0), (frame.shape[1], frame.shape[0]), (0, 0, 255),cv2.BORDER_TRANSPARENT)
         cv2.putText(
             frame,
             "alguien necesita ayuda",
@@ -97,11 +113,14 @@ while True:
             (0, 0, 0),
             4
         )
-        reproducir = True
         frames_alerta -= 1
+        reproducir = True
+
         if frames_alerta <= 0:
             alerta_activa = False
             reproducir = False
+
+        # print(f"Current frame: {frames_alerta}, Has been reproduced: {AlreadyReproduced}")
 
     cv2.imshow("Detector de Signal For Help", frame)
 
