@@ -5,8 +5,6 @@ import mediapipe.python.solutions.drawing_utils as mp_draw
 import playsound3
 import threading 
 
-reproducir = False
-firstFrame = True
 AlreadyReproduced = False 
 
 audio_en_reproduccion = False 
@@ -81,7 +79,6 @@ while True:
             if ciclos >= 5:
                 alerta_activa = True
                 ciclos = 0  
-                frames_alerta = 490
 
             # Mostrar información en pantalla
 
@@ -92,13 +89,10 @@ while True:
             else:
                 continue
 
-    if reproducir and not audio_en_reproduccion:
+    if not audio_en_reproduccion and alerta_activa and not AlreadyReproduced:
         audio_en_reproduccion = True
-        reproducir = False
-        t = threading.Thread(
-        target=reproducirAudio,
-        args=("Detector de signal for help/alarm1.mp3",),
-        daemon=True)
+        AlreadyReproduced = True
+        t = threading.Thread(target=reproducirAudio,args=("Detector de signal for help/alarm1.mp3",),daemon=True)
         t.start()
 
     if alerta_activa:
@@ -113,14 +107,10 @@ while True:
             (0, 0, 0),
             4
         )
-        frames_alerta -= 1
-        reproducir = True
 
-        if frames_alerta <= 0:
+        if not audio_en_reproduccion:
             alerta_activa = False
-            reproducir = False
-
-        # print(f"Current frame: {frames_alerta}, Has been reproduced: {AlreadyReproduced}")
+            AlreadyReproduced = False
 
     cv2.imshow("Detector de Signal For Help", frame)
 
