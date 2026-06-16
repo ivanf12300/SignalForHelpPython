@@ -5,6 +5,8 @@ import mediapipe.python.solutions.drawing_utils as mp_draw
 import playsound3
 import threading 
 
+width, height = 900, 800
+
 AlreadyReproduced = False 
 
 audio_en_reproduccion = False 
@@ -19,6 +21,9 @@ hands = mp_hands.Hands(
     min_detection_confidence=0.7
 )
 camara = cv2.VideoCapture(0)
+
+camara.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+camara.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
 estado = 4
 ciclos = 0
@@ -98,15 +103,18 @@ while True:
     if alerta_activa:
         totalDeFrames = 0
         cv2.rectangle(frame, (0, 0), (frame.shape[1], frame.shape[0]), (0, 0, 255),cv2.BORDER_TRANSPARENT)
-        cv2.putText(
-            frame,
-            "alguien necesita ayuda",
-            (40,240),
-            cv2.FONT_HERSHEY_DUPLEX,
-            1.5,
-            (0, 0, 0),
-            4
-        )
+
+        text = "Alguien necesita ayuda"
+        font = cv2.FONT_HERSHEY_DUPLEX
+        scale = 1.5
+        thickness = 4
+
+        (text_width,text_height),_ = cv2.getTextSize(text,font,scale,thickness)
+
+        X = (frame.shape[1] - text_width) // 2
+        Y = (frame.shape[0] + text_height) // 2
+
+        cv2.putText(frame,text,(X,Y),font,scale,(0,0,0),thickness)
 
         if not audio_en_reproduccion:
             alerta_activa = False
